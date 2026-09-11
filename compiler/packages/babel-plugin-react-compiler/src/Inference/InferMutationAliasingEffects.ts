@@ -513,7 +513,7 @@ function inferBlock(
     if (handlerParam != null) {
       CompilerError.invariant(state.kind(handlerParam) != null, {
         reason:
-          'Expected catch binding to be intialized with a DeclareLocal Catch instruction',
+          'Expected catch binding to be initialized with a DeclareLocal Catch instruction',
         loc: terminal.loc,
       });
       const effects: Array<AliasingEffect> = [];
@@ -1315,7 +1315,7 @@ class InferenceState {
   #values: Map<InstructionValue, AbstractValue>;
   /*
    * The set of values pointed to by each identifier. This is a set
-   * to accomodate phi points (where a variable may have different
+   * to accommodate phi points (where a variable may have different
    * values from different control flow paths).
    */
   #variables: Map<IdentifierId, Set<InstructionValue>>;
@@ -2213,8 +2213,8 @@ function computeSignatureForInstruction(
       effects.push({kind: 'Assign', from: value.value, into: lvalue});
       break;
     }
-    case 'PostfixUpdate':
-    case 'PrefixUpdate': {
+    case 'PostfixUpdateLocal':
+    case 'PrefixUpdateLocal': {
       effects.push({
         kind: 'Create',
         into: lvalue,
@@ -2227,6 +2227,17 @@ function computeSignatureForInstruction(
         value: ValueKind.Primitive,
         reason: ValueReason.Other,
       });
+      break;
+    }
+    case 'PostfixUpdateContext':
+    case 'PrefixUpdateContext': {
+      effects.push({
+        kind: 'Create',
+        into: lvalue,
+        value: ValueKind.Primitive,
+        reason: ValueReason.Other,
+      });
+      effects.push({kind: 'Mutate', value: value.lvalue});
       break;
     }
     case 'StoreGlobal': {
